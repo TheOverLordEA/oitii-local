@@ -6,9 +6,6 @@ import {
   Briefcase, 
   FileText, 
   Activity, 
-  MessageSquare, 
-  XCircle, 
-  ChevronRight,
   PlusCircle,
   ArrowLeft,
   Zap,
@@ -37,21 +34,27 @@ interface ActionCardProps {
 
 function ActionCard({ onClick, icon, title, subtitle }: ActionCardProps) {
   return (
-    <motion.button
-      whileHover={{ scale: 1.01, y: -1 }}
-      whileTap={{ scale: 0.98 }}
+    <button
       onClick={onClick}
-      className="w-full flex items-center p-4 bg-white border border-zinc-200 rounded-2xl shadow-sm hover:shadow-md hover:border-zinc-300 transition-all text-left group relative overflow-hidden"
+      className="w-full flex items-start p-3 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors text-left group"
     >
-      <div className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-zinc-100 text-zinc-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors mr-4">
-        {icon}
+      {/* Icon — raw muted, no background circle */}
+      <div className="shrink-0 text-zinc-400 group-hover:text-zinc-600 mt-0.5 mr-3 transition-colors">
+        <div className="[&>svg]:w-4 [&>svg]:h-4">
+          {icon}
+        </div>
       </div>
-      <div className="flex flex-col flex-1">
-        <span className="text-sm font-semibold text-zinc-900">{title}</span>
-        <span className="text-xs text-zinc-500 mt-0.5">{subtitle}</span>
+
+      {/* Text Content */}
+      <div className="flex flex-col">
+        <span className="text-[13px] font-semibold text-zinc-700 group-hover:text-zinc-900 transition-colors">
+          {title}
+        </span>
+        <span className="text-[12px] text-zinc-500 mt-0.5 line-clamp-1">
+          {subtitle}
+        </span>
       </div>
-      <ChevronRight className="w-5 h-5 text-zinc-300 group-hover:text-zinc-500 group-hover:translate-x-0.5 transition-all" />
-    </motion.button>
+    </button>
   );
 }
 
@@ -82,20 +85,7 @@ const MENU_DATA: Record<string, {
       icon: <FileText className="w-5 h-5" />
     }
   ],
-  STATUS_SUBMENU: [
-    { 
-      id: 'MSG_EMPLOYER', 
-      title: "Message Employer", 
-      subtitle: "Open secure messaging portal",
-      icon: <MessageSquare className="w-5 h-5" />
-    },
-    { 
-      id: 'WITHDRAW_APP', 
-      title: "Withdraw Application", 
-      subtitle: "Are you sure you want to withdraw?",
-      icon: <XCircle className="w-5 h-5" />
-    }
-  ],
+  STATUS_SUBMENU: [],
   RESUME_ROOT_MENU: [
     { 
       id: 'CREATE_RESUME', 
@@ -164,9 +154,9 @@ export function QuickActions({ currentMenu, onSelect }: QuickActionsProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      className="flex flex-col gap-3 p-4 px-5"
+      className="flex flex-col gap-2 w-full pt-2"
     >
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         {actions.map((action) => (
           <ActionCard
             key={action.id}
@@ -179,23 +169,14 @@ export function QuickActions({ currentMenu, onSelect }: QuickActionsProps) {
       </div>
 
       {currentMenu !== 'MAIN' && (
-        <motion.button
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={() => onSelect('BACK_MAIN', "Back to main menu")}
-          className="flex items-center justify-center w-full py-2.5 mt-4 bg-white border border-zinc-200 rounded-xl shadow-sm text-sm font-medium text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-all focus:outline-hidden focus:ring-2 focus:ring-zinc-200"
+          className="self-start flex items-center text-[13px] font-medium text-zinc-500 hover:text-zinc-900 transition-colors mt-2 px-1 py-2"
         >
-          <ArrowLeft className="w-4 h-4 mr-2 text-zinc-400" />
+          <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
           Back to main menu
-        </motion.button>
+        </button>
       )}
-      
-      <button
-        onClick={() => onSelect('TYPE_CUSTOM', "Write in the chat")}
-        className="w-full block text-center py-2 mt-2 text-xs font-medium text-zinc-400 hover:text-zinc-600 transition-colors focus:outline-hidden"
-      >
-        Write in the chat
-      </button>
     </motion.div>
   );
 }

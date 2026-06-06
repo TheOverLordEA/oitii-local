@@ -28,7 +28,9 @@ export function getAIModel(): LanguageModel {
       apiKey: process.env.GROQ_API_KEY,
       baseURL: "https://api.groq.com/openai/v1",
     });
-    return groq.chat("llama-3.3-70b-versatile") as unknown as LanguageModel;
+    // llama-3.3-70b-versatile does not support JSON mode on Groq yet.
+    // llama-3.1-8b-instant is fully supported for structured outputs.
+    return groq.chat("llama-3.1-8b-instant") as unknown as LanguageModel;
   }
 
   // Fallback to local Ollama instance if no valid cloud API key is found

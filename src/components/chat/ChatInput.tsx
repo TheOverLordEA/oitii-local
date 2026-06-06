@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Plus, Send, Paperclip, X } from "lucide-react";
-import { AttachmentMenu } from "./AttachmentMenu";
+import { ArrowUp, Paperclip, X, Image, FileText, Smile } from "lucide-react";
 
 interface ChatInputProps {
   inputEnabled: boolean;
@@ -20,15 +19,15 @@ export function ChatInput({
   disabledPlaceholder = "Please select an option above..."
 }: ChatInputProps) {
   const [inputValue, setInputValue] = useState("");
-  const [showPlusMenu, setShowPlusMenu] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
+      textareaRef.current.style.height = "24px";
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
     }
   }, [inputValue]);
 
@@ -54,21 +53,21 @@ export function ChatInput({
     setInputValue("");
     setSelectedFile(null);
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = "24px";
     }
   };
 
   return (
-    <footer className="p-4 bg-white border-t border-zinc-100 flex flex-col gap-2 relative">
+    <div className="flex flex-col gap-2 relative">
       {/* Attachment Badge */}
       {selectedFile && (
-        <div className="flex items-center gap-2 self-start bg-zinc-100 text-zinc-800 text-xs px-3 py-1.5 rounded-full border border-zinc-200">
-          <Paperclip className="w-3.5 h-3.5 text-zinc-500" />
+        <div className="flex items-center gap-2 self-start bg-gray-100 text-gray-800 text-xs px-3 py-1.5 rounded-full border border-gray-200">
+          <Paperclip className="w-3.5 h-3.5 text-gray-500" />
           <span className="truncate max-w-[200px] font-medium">{selectedFile.name}</span>
           <button
             type="button"
             onClick={() => setSelectedFile(null)}
-            className="p-0.5 hover:bg-zinc-200 rounded-full text-zinc-500 hover:text-black transition-colors focus:outline-none"
+            className="p-0.5 hover:bg-gray-200 rounded-full text-gray-500 hover:text-gray-900 transition-colors focus:outline-none"
             aria-label="Remove attachment"
           >
             <X className="w-3.5 h-3.5" />
@@ -77,7 +76,12 @@ export function ChatInput({
       )}
 
       <form 
-        className="relative flex items-end bg-zinc-50 border border-zinc-200 rounded-[24px] transition-all"
+        className="relative bg-white rounded-[18px] transition-all"
+        style={{
+          boxShadow: isFocused 
+            ? "0 0 0 1px rgba(0,0,0,0.12), 0 4px 24px -4px rgba(0,0,0,0.12)" 
+            : "0 0 0 1px rgba(0,0,0,0.06), 0 2px 12px -4px rgba(0,0,0,0.08)"
+        }}
         onSubmit={handleSubmit}
       >
         <input 
@@ -92,45 +96,71 @@ export function ChatInput({
             if (fileInputRef.current) fileInputRef.current.value = "";
           }} 
         />
-        <AttachmentMenu 
-          isOpen={showPlusMenu} 
-          onClose={() => setShowPlusMenu(false)} 
-          onUploadClick={() => fileInputRef.current?.click()}
-        />
-        <button
-          id="attachment-toggle-btn"
-          type="button"
-          onClick={() => setShowPlusMenu(!showPlusMenu)}
-          disabled={!inputEnabled || isDisabled}
-          className="h-[48px] pl-4 pr-2 shrink-0 flex items-center text-zinc-500 hover:text-black transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Add attachment"
-        >
-          <Plus className={`w-5 h-5 transition-transform duration-200 ${showPlusMenu ? "rotate-45" : ""}`} />
-        </button>
-        <textarea
-          ref={textareaRef}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          maxLength={4000}
-          rows={1}
-          placeholder={isDisabled ? disabledPlaceholder : (inputEnabled ? "Type your message..." : "Waiting for response...")}
-          disabled={!inputEnabled || isDisabled}
-          onFocus={onFocus}
-          aria-disabled={(!inputEnabled || isDisabled) ? "true" : "false"}
-          className="w-full bg-transparent py-3.5 pr-12 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed resize-none overflow-y-auto"
-          style={{ minHeight: "48px" }}
-        />
-        <button
-          type="submit"
-          disabled={!inputEnabled || isDisabled || (!inputValue.trim() && !selectedFile)}
-          aria-label="Send message"
-          aria-disabled={!inputEnabled || isDisabled || (!inputValue.trim() && !selectedFile) ? "true" : "false"}
-          className="absolute right-2 bottom-2 p-2 bg-black text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-        >
-          <Send className="w-4 h-4 ml-[2px] mt-px" />
-        </button>
+        
+        {/* Toolbar icons row */}
+        <div className="flex items-center gap-0.5 px-3 pt-3">
+          <button 
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={!inputEnabled || isDisabled}
+            className="p-2 rounded-lg hover:bg-slate-100 transition-colors group focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Paperclip className="size-[18px] text-slate-400 group-hover:text-slate-600 transition-colors" />
+          </button>
+          <button type="button" className="p-2 rounded-lg hover:bg-slate-100 transition-colors group focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+            <Image className="size-[18px] text-slate-400 group-hover:text-slate-600 transition-colors" />
+          </button>
+          <button type="button" className="p-2 rounded-lg hover:bg-slate-100 transition-colors group focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+            <FileText className="size-[18px] text-slate-400 group-hover:text-slate-600 transition-colors" />
+          </button>
+          <button type="button" className="p-2 rounded-lg hover:bg-slate-100 transition-colors group focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+            <Smile className="size-[18px] text-slate-400 group-hover:text-slate-600 transition-colors" />
+          </button>
+        </div>
+
+        {/* Textarea */}
+        <div className="px-4 pb-4 pt-2">
+          <textarea
+            ref={textareaRef}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            maxLength={4000}
+            rows={1}
+            placeholder={isDisabled ? disabledPlaceholder : (inputEnabled ? "Ask anything about your job search..." : "Waiting for response...")}
+            disabled={!inputEnabled || isDisabled}
+            onFocus={() => {
+              setIsFocused(true);
+              onFocus();
+            }}
+            onBlur={() => setIsFocused(false)}
+            aria-disabled={(!inputEnabled || isDisabled) ? "true" : "false"}
+            className="w-full resize-none bg-transparent text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none leading-relaxed pr-12 disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ 
+              minHeight: "24px", 
+              maxHeight: "120px",
+              transition: "height 0.25s cubic-bezier(0.25, 0.8, 0.25, 1)"
+            }}
+          />
+        </div>
+
+        {/* Send Button */}
+        <div className="absolute bottom-3.5 right-3.5">
+          <button
+            type="submit"
+            disabled={!inputEnabled || isDisabled || (!inputValue.trim() && !selectedFile)}
+            aria-label="Send message"
+            aria-disabled={!inputEnabled || isDisabled || (!inputValue.trim() && !selectedFile) ? "true" : "false"}
+            className={`flex items-center justify-center size-9 rounded-full transition-all duration-200 shadow-none focus:outline-none ${
+              (inputValue.trim() || selectedFile) && inputEnabled && !isDisabled
+                ? "bg-black hover:bg-slate-800 text-white hover:scale-105"
+                : "bg-slate-200 text-slate-400 cursor-not-allowed"
+            }`}
+          >
+            <ArrowUp className="size-[18px]" strokeWidth={2.5} />
+          </button>
+        </div>
       </form>
-    </footer>
+    </div>
   );
 }

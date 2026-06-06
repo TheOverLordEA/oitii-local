@@ -8,19 +8,79 @@ generator client {
 }
 
 model Resume {
-  id               String   @id @default(uuid())
-  fileName         String
-  localPath        String
-  parsedText       String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id         String   @id @default(uuid())
+  sessionId  String?
+  fileName   String
+  localPath  String
+  parsedText String?
+  parsedJson String?  // JSON-stringified ResumeData (skills, experience, etc.)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([sessionId])
 }
 
 model JobApplication {
   id        String   @id @default(uuid())
+  sessionId String?   // anonymous user session
   company   String
   role      String
-  status    String   // e.g., 'PENDING', 'APPLIED', 'INTERVIEWING', 'REJECTED', 'OFFER'
+  jobUrl    String?
+  status    String   // PENDING | APPLIED | INTERVIEWING | OFFER | REJECTED
+  notes     String?
   appliedAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([sessionId])
+}
+
+/// Anonymous user search preferences. One row per session cookie.
+/// Array fields stored as JSON-stringified arrays for SQLite compatibility.
+model UserProfile {
+  id            String   @id @default(uuid())
+  sessionId     String   @unique
+  targetTitles  String?  // JSON: string[]
+  locations     String?  // JSON: string[]
+  workStyle        String?  // remote | hybrid | onsite | any
+  salaryFloor       Int?     // user-entered minimum
+  inferredSeniority String?  // LLM-inferred: junior | mid | senior | staff | principal
+  inferredSalary    Int?     // LLM-inferred baseline from resume history
+  dealbreakers      String?  // JSON: string[] e.g. ["no relocation", "no on-call"]
+  basicDetails      String?  // JSON: { firstName, lastName, email, phone, ... }
+  resumeId          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  curatedMatches    CuratedMatch[]
+}
+
+model DiscoveredJob {
+  id          String   @id @default(uuid())
+  title       String
+  company     String
+  url         String
+  description String
+  postedAt    DateTime
+  isProcessed Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  matches     CuratedMatch[]
+}
+
+model CuratedMatch {
+  id            String   @id @default(uuid())
+  jobId         String
+  userId        String
+  matchScore    Int
+  aiReasoning   String
+  status        String   @default("Pending_Approval")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  job           DiscoveredJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user          UserProfile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([userId])
 }
